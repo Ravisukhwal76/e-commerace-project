@@ -1,24 +1,42 @@
-    const fetchData = async () => {
-            try {
-                const axiosInstance = axios.create({
-                    baseURL: 'http://localhost:8080',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${authToken}`, // Use Authorization header for token
-                    },
-                    withCredentials: true,
-                });
+ const loginAction = async (data) => {
+        const myHeaders = new Headers();
+        myHeaders.append('Content-Type', 'application/json');
 
-                const response = await axiosInstance.get(`/api/myTask/${id}`);
-                setTasks(response.data);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-                console.log('Response:', error.response); // Log the response for more details
-                setError('Error fetching data. Please try again.');
-            } finally {
-                setLoading(false);
-            }
+        const requestOptions = {
+            method: 'POST',
+            headers: myHeaders,
+            body: JSON.stringify(data),
+            credentials: 'include',
+            redirect: 'follow',
         };
 
-        fetchData();
-    }, []);
+        try {
+            const response = await fetch("http://localhost:8080/api/auth/login", requestOptions);
+            const res = await response.json();  // Assuming the response is in JSON format
+
+            // Check if the login was successful
+            if (response.ok) {
+                console.log(res);
+
+                // Access and handle cookies
+                const setCookieHeader = response.headers.get('Set-Cookie');
+                if (setCookieHeader) {
+                    // Parse the setCookieHeader if needed
+                    console.log('Received cookies:', setCookieHeader);
+                }
+
+                setUser({ token: res.jwtToken });
+                console.log(res.jwtToken);
+                localStorage.setItem("authToken", res.jwtToken);
+                localStorage.setItem("userId", res.id);
+                navigate("/home");
+            } else {
+                // Failed login, handle the error
+                const errorMessage = res.message || 'Login failed';
+                alert(errorMessage);
+                console.log(data);
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
