@@ -20,3 +20,4 @@
            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
        }
    }
+$2a$10$b0hpZGpK/7Y1Wfefm/y7quSLJIz2h4sDQ2E5u/FnmLRxF8z1dxFIu
