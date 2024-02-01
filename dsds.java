@@ -1,31 +1,22 @@
-const fetchData = async () => {
-            try {
-                const authToken = localStorage.getItem('authToken');
+   @GetMapping("/api/getUsers/{id}")
+   public ResponseEntity<List<UserDto>> getUsersExcludingCurrent(@PathVariable("id") Integer id) {
+       try {
+           log.info("Received request to fetch users excluding id: {}", id);
 
-                if (!authToken) {
-                    console.error('No authentication token found.');
-                    // Handle the absence of the token, e.g., redirect to login.
-                    return;
-                }
+           List<User> users = userService.getUsersExcludingCurrent(id);
 
-                const axiosInstance = axios.create({
-                    baseURL: 'http://localhost:8080',
-                    withCredentials: true, // Include cookies with the request
-                });
+           // Filter users based on ROLE_EMPLOYEE
+           List<User> employeeUsers = users.stream()
+                   .filter(user -> user.getRoles().stream()
+                           .anyMatch(role -> role.getName() == ERole.ROLE_EMPLOYEE))
+                   .collect(Collectors.toList());
 
-                const response = await axiosInstance.get(`/api/myTasks/${id}`, {
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`,
-                        'Content-Type': 'application/json',
-                    },
-                });
+            List<UserDto> userDtos = userService.convertToDtoList(employeeUsers);
 
-                console.log('Data received:', response.data);
-                setTasks(Array.isArray(response.data) ? response.data : []);
-                setLoading(false);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-                setError('Error fetching data. Please try again.');
-                setLoading(false);
-            }
-        };
+           log.info("Returning {} employee users in the response.", userDtos.size());
+           return new ResponseEntity<>(userDtos, HttpStatus.OK);
+       } catch (Exception e) {
+           log.error("Error processing getUsersExcludingCurrent request.", e);
+           return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+       }
+   }
