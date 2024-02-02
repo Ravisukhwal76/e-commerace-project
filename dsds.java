@@ -1,23 +1,12 @@
-   @GetMapping("/api/getUsers/{id}")
-   public ResponseEntity<List<UserDto>> getUsersExcludingCurrent(@PathVariable("id") Integer id) {
-       try {
-           log.info("Received request to fetch users excluding id: {}", id);
+@PatchMapping("task/{id}/complete")
+   public ResponseEntity < TaskAssignDto > completeTask(@PathVariable("id") long id) {
+      TaskAssign exstingtask = taskAssignService.getTaskAssignById(id).get();
 
-           List<User> users = userService.getUsersExcludingCurrent(id);
+      exstingtask.setComplted(true);
 
-           // Filter users based on ROLE_EMPLOYEE
-           List<User> employeeUsers = users.stream()
-                   .filter(user -> user.getRoles().stream()
-                           .anyMatch(role -> role.getName() == ERole.ROLE_EMPLOYEE))
-                   .collect(Collectors.toList());
+      taskAssignService.updateTaskAssign(exstingtask);
 
-            List<UserDto> userDtos = userService.convertToDtoList(employeeUsers);
+      return new ResponseEntity < TaskAssignDto > (HttpStatus.NO_CONTENT);
 
-           log.info("Returning {} employee users in the response.", userDtos.size());
-           return new ResponseEntity<>(userDtos, HttpStatus.OK);
-       } catch (Exception e) {
-           log.error("Error processing getUsersExcludingCurrent request.", e);
-           return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-       }
    }
-$2a$10$b0hpZGpK/7Y1Wfefm/y7quSLJIz2h4sDQ2E5u/FnmLRxF8z1dxFIu
+   
