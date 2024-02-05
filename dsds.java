@@ -1,24 +1,3 @@
- @GetMapping("myTasks/progress/{id}")
-   private ResponseEntity<Integer> calculateCompletionPercentage(@PathVariable("id") int id) {
-	   List<TaskAssign> allTasks = taskAssignService.getAllTaskAssignByUserId(id);
-	   // Include tasks where isStatus is true and isComplete is false
-       List<TaskAssign> filteredTasks = allTasks.stream()
-               .filter(taskAssign -> taskAssign.isStatus())
-               .collect(Collectors.toList());
- 
-       long completedTasks = filteredTasks.stream().filter(TaskAssign::isComplted).count();
-       double completionPercentage = ((double) completedTasks / allTasks.size()) * 100; 
-	 
-	   if (allTasks.isEmpty()) {
-	        return  new ResponseEntity<>((int)completionPercentage, HttpStatus.OK); // No tasks, completion percentage is 0
-	    }
-
-	    
-	      return new ResponseEntity<>((int)completionPercentage, HttpStatus.OK);
-	}
-
-///fronted 
-
 import  { useState, useEffect } from 'react';
 import './css/Notification.css';
 import axios from "axios";
@@ -28,7 +7,7 @@ const MyTask = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [progress, setProgress] = useState(0);
-    let value;
+
     const fetchData = async () => {
         try {
             const id = localStorage.getItem("userId");
